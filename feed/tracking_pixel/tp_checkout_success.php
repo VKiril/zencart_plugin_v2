@@ -70,7 +70,7 @@
                 var head = document.getElementsByTagName('head')[0];
                 var script = document.createElement('script');
                 script.type = 'text/javascript';
-                script.src = (location.protocol == "https:" ? "https:" : "http:") + '//static.feed.de/pixel.js';
+                script.src = (location.protocol == "https:" ? "https:" : "http:") + '//daily-feed.com/bundles/managementtracking/js/pixel.js';
                 // fire the loading
                 head.appendChild(script);
             })();

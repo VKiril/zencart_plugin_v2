@@ -8,7 +8,6 @@ class FeedConnector implements FeedPlugin
     protected $config;
     protected $shopConfig;
 
-
     /**
      * constructor caller is forwarded
      *
@@ -65,7 +64,6 @@ class FeedConnector implements FeedPlugin
      */
     public function getFeed(stdClass $queryParameters, array $fieldMap)
     {
-
         set_time_limit(0);
         $this->config->iniParameters();
         $limit = 10;
@@ -233,17 +231,17 @@ class FeedConnector implements FeedPlugin
     public function getOrderProducts(stdClass $queryParameters, $id)
     {
         $products = null;
-
-
         if ($queryParameters->currency) {
             $currency = $this->config->getCurrencyId($queryParameters->currency);
             $products = $this->config->getOrdersProducts($currency, $id);
         }
-
+        if(!$products){
+            echo 'This order does not exist';
+            die;
+        }
         $result = array();
         $i = 0;
         foreach ($products as $item) {
-
             $result[$i]['ModelOwn'] = $item['attributes']['ModelOwn'];
             $result[$i]['Quantity'] = $item['product']['qty'];
             $result[$i]['BasePrice'] = $item['product']['price'];
@@ -251,7 +249,8 @@ class FeedConnector implements FeedPlugin
             $i++;
         }
 
-        return $result;
+        print_r($result);
+        //return $result;
     }
 
     /**

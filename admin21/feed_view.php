@@ -103,7 +103,7 @@ if(isset($_POST['FEED_USER']) && isset($_POST['FEED_PASS']) && isset($_POST['FEE
             // -->
         </script>
     </head>
-    <body onload="init()" style="background-image: url('../images/backgroung/back-gnd.jpg')">
+    <!--<body onload="init()" style="background-image: url('../images/background/back-gnd.jpg')">-->
     <!-- header //-->
     <?php require(DIR_WS_INCLUDES . 'header.php'); ?>
     <!-- header_eof //-->

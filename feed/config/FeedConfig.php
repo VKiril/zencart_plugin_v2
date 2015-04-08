@@ -421,6 +421,7 @@ class FeedConfig
 
         $query = $select . $from . $where . $dimensions;
         $response = $this->dataFetch($db->Execute($query), true);
+
         $temp = array();
 
         foreach ($response as $item) {
@@ -618,14 +619,14 @@ class FeedConfig
 
     public function getCurrencyId($currency)
     {
+
         $query = "
                     select
                         c.currencies_id as currencies_id
                     FROM " . TABLE_CURRENCIES . " c
                     where c.code = " . "'" . $currency . "'";
         $db = $GLOBALS['db'];
-        $currencyId = $db->Execute($query);
-        $currencyId = $this->dataFetch($currencyId);
+        $currencyId = $this->dataFetch($db->Execute($query));
         $currencyId = (int)$currencyId[0]['currencies_id'];
 
         return $currencyId;
@@ -641,6 +642,9 @@ class FeedConfig
     public function getOrdersProducts($currency, $id, $print = true, $tracking = false)
     {
         $products = $this->_getOrdersProducts($id, $currency);
+        if(!$products){
+            return null;
+        }
         $attributes = $this->_getOrdersAttributes($id);
         $temp = array();
         foreach ($products as $key => $value) {

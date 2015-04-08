@@ -60,6 +60,7 @@ class Feed
      */
     public function dispatch($request)
     {
+
         if (!isset($request['secret']) || !$this->_checkSecurity($request['secret'])) {
             header('HTTP/1.0 401 Unauthorized');
             exit("401");
