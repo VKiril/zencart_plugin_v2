@@ -6,6 +6,8 @@ class FeedConnector implements FeedPlugin
     protected $productsWithAttributes;
     protected $order;
     protected $config;
+    protected $shopConfig;
+
 
     /**
      * constructor caller is forwarded
@@ -15,6 +17,7 @@ class FeedConnector implements FeedPlugin
     public function __construct(Feed $container)
     {
         $this->config = new FeedConfig();
+        $this->shopConfig = new ShopConfig();
     }
 
     /**
@@ -62,6 +65,7 @@ class FeedConnector implements FeedPlugin
      */
     public function getFeed(stdClass $queryParameters, array $fieldMap)
     {
+
         set_time_limit(0);
         $this->config->iniParameters();
         $limit = 10;
@@ -115,9 +119,9 @@ class FeedConnector implements FeedPlugin
     public function getShopConfig()
     {
         $shopConfig = new stdClass();
-        $shopConfig->language = $this->config->getShopLanguageConfig();
-        $shopConfig->currency = $this->config->getShopCurrencyConfig();
-        $shopConfig->status = $this->config->getShopCondition();
+        $shopConfig->language = $this->shopConfig->getShopLanguageConfig();
+        $shopConfig->currency = $this->shopConfig->getShopCurrencyConfig();
+        $shopConfig->status = $this->shopConfig->getShopCondition();
 
         return $shopConfig;
     }

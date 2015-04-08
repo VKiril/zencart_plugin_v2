@@ -82,7 +82,7 @@ class FeedConfig
     protected $categoryParent;
     protected $categoryPath;
 
-    //the rule is: key->admin panel fields name with prefix FEEDIFY_FIELD_
+    //the rule is: key->admin panel fields name with prefix FEED_FIELD_
     //value->name of field which is extracted from db
     //if is necessary to add a new field simply add here a new item and
     //in function getFeedColumnValue set the value to export like this: $oArticle["coupon"]
@@ -101,20 +101,13 @@ class FeedConfig
         "COUPON" => "coupon",
         "AUTO_MANUFACTURER" => "auto_manufacturer"
     );
-    public static $feed_view_fields = array(
-        'FIELD_TAX'=>'FIELD_TAX',
-        'FIELD_SHIPPING_COST'=>'FIELD_SHIPPING_COST',
-        'FIELD_COUPON'=>'FIELD_COUPON',
-        'FIELD_EAN'=>'FIELD_EAN',
-        'FIELD_GOOGLE'=>'FIELD_GOOGLE',
-        'FIELD_SUBTITLE'=>'FIELD_SUBTITLE'
-    );
-
 
     public function __construct()
     {
         $this->_initParameters();
     }
+
+
 
     protected function _initParameters()
     {
@@ -123,11 +116,11 @@ class FeedConfig
             unset($this->parameters[$key]);
         }
 
-        $this->getFeedifyShippingParameters();
+        $this->getFeedShippingParameters();
         $this->setProductsOptions();
         $this->setManufactures();
         $this->setCategories();
-        $this->getFeedifyFormData();
+        $this->getFeedFormData();
         $this->setLocale();
     }
 
@@ -140,14 +133,14 @@ class FeedConfig
         return $config->fields['configuration_value'];
     }
 
+
     /**
      * @param $string
      * @return string
      */
-    //get the user data from database, example : getConfig('FEEDIFY_PASSWORD')
-    public function getFeedifyShippingParameters()
+    public function getFeedShippingParameters()
     {
-        $db = $GLOBALS['db'];        //database
+        $db = $GLOBALS['db'];
 
         $query = "
 				SELECT configuration_key, configuration_value
@@ -174,17 +167,14 @@ class FeedConfig
     }
 
     /**
-     * @return array
-     */
-    //select from db all languages and stock it into array
-    /**
      * @param $resource
      * @param bool $setIds
      * @return array
      */
     public function dataFetch($resource, $setIds = false)
     {
-        $output = array(); //if is set parameter $setIds function store ids of fetched data to $this->productsIds
+        $output = array();
+        //if is set parameter $setIds function store ids of fetched data to $this->productsIds
         if ($resource->fields) {
             while (!$resource->EOF) {
                 if ($setIds === true) {
@@ -204,7 +194,6 @@ class FeedConfig
     /**
      * @return array
      */
-    //select from db currencyes and stock it into array
     public function setProductsOptions()
     {
 
@@ -278,7 +267,7 @@ class FeedConfig
         $this->productsCategory = $result;
     }
 
-    public function getFeedifyFormData()
+    public function getFeedFormData()
     {
         $query = '
                 select
@@ -314,36 +303,6 @@ class FeedConfig
     }
 
     /**
-     * update database
-     */
-    public function remove()
-    {
-        $db = $GLOBALS['db'];
-
-        $db->Execute("
-            DELETE FROM " . TABLE_CONFIGURATION . "
-            WHERE configuration_key LIKE '%FEED_%'"
-        );
-    }
-
-    /**
-     * save data in database
-     */
-    public function install()
-    {
-        $db = $GLOBALS['db'];
-
-        foreach ($_POST as $feedifyField => $value) {
-            if (strpos($feedifyField, 'FEED_') !== false) {
-                $db->Execute("
-                    INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value)
-                    VALUES ('" . $feedifyField . "','" . $value . "' )"
-                );
-            }
-        }
-    }
-
-    /**
      * @return array
      */
     public function getTaxZones()
@@ -356,118 +315,6 @@ class FeedConfig
             $rez[$result->fields['geo_zone_id']] = $result->fields['geo_zone_name'];
             $result->MoveNext();
         }
-
-        return $rez;
-    }
-
-    /**
-     * @return stdClass
-     */
-    public function getShopLanguageConfig()
-    {
-        $oConfig = new stdClass();
-        $aLanguages = $this->getLanguagesArray();
-        $oConfig->key = "language";
-        $oConfig->title = "language";
-        foreach ($aLanguages as $language) {
-            $oValue = new stdClass();
-            $oValue->key = $language['code'];
-            $oValue->title = $language['name'];
-            $oConfig->values[] = $oValue;
-        }
-
-        return $oConfig;
-    }
-
-
-    //function for checking if column products_id exist in tables $table
-
-
-    public function getLanguagesArray()
-    {
-        $db = $GLOBALS['db'];
-        $query = $db->Execute("SELECT languages_id as id, code, name FROM " . TABLE_LANGUAGES);
-
-        $rez = $this->dataFetch($query);
-
-        return $rez;
-    }
-
-    /**
-     * @return stdClass
-     */
-    public function getShopCondition()
-    {
-        $values = array(
-            0 => 'export_all_products',
-            1 => 'export_active_products',
-            2 => 'export_products_in_stock',
-            3 => 'export_active_products_in_stock',
-        );
-
-        $stdConfig = new stdClass();
-        $stdConfig->key = 'status';
-        $stdConfig->title = 'status';
-        foreach ($values as $key => $title) {
-            $stdValue = new stdClass();
-            $stdValue->key = $key;
-            $stdValue->title = $title;
-            $stdConfig->values[] = $stdValue;
-        }
-
-        return $stdConfig;
-    }
-
-    /**
-     * @return stdClass
-     */
-    public function getShopAvailabilityConfig()
-    {
-        $oConfig = new stdClass();
-        $aAvailabilities[] = array('id' => '1', 'title' => 'No export inactive and with quantity = 0 products');
-        $aAvailabilities[] = array('id' => '2', 'title' => 'Export inactive No export with quantity = 0 products');
-        $aAvailabilities[] = array('id' => '3', 'title' => 'No export inactive Export with quantity = 0 products');
-        $aAvailabilities[] = array('id' => '4', 'title' => 'Export inactive and with quantity = 0 products');
-        $oConfig->key = "status";
-        $oConfig->title = "Status";
-        foreach ($aAvailabilities as $oAvailability) {
-            $oValue = new stdClass();
-            $oValue->key = $oAvailability['id'];
-            $oValue->title = $oAvailability['title'];
-            $oConfig->values[] = $oValue;
-        }
-
-        return $oConfig;
-    }
-
-    //get and analyze the shipping parameters and set priority of fields
-
-    /**
-     * @return stdClass
-     */
-    public function getShopCurrencyConfig()
-    {
-        $oConfig = new stdClass();
-        $aCurrencies = $this->getCurrencyArray();
-        $oConfig->key = "currency";
-        $oConfig->title = "currency";
-        foreach ($aCurrencies as $oCurrency) {
-            $oValue = new stdClass();
-            $oValue->key = $oCurrency['code'];
-            $oValue->title = $oCurrency['title'];
-            $oConfig->values[] = $oValue;
-        }
-
-        return $oConfig;
-    }
-
-
-    public function getCurrencyArray()
-    {
-        $db = $GLOBALS['db'];
-        $query = $db->Execute("SELECT currencies_id as id, code, title FROM " . TABLE_CURRENCIES);
-
-        $rez = $this->dataFetch($query);
 
         return $rez;
     }
@@ -571,7 +418,7 @@ class FeedConfig
         if ($limit != null and $offset != null or $limit != null and $offset == 0) {
             $dimensions = ' limit ' . $limit . '  offset ' . $offset;
         }
-        //var_dump($limit,$offset,$dimensions);die;
+
         $query = $select . $from . $where . $dimensions;
         $response = $this->dataFetch($db->Execute($query), true);
         $temp = array();
@@ -837,7 +684,6 @@ class FeedConfig
 
     protected function _getOrdersAttributes($id)
     {
-        $db = $GLOBALS['db'];
         $select = '
                 select
                     op.products_id as products_id,
@@ -1044,49 +890,6 @@ class FeedConfig
     }
 
     /**
-     * @param $csv_file
-     * @param $product
-     * @param $attributes
-     * @param $fieldMap
-     * @param $shopConfig
-     * @param $queryParameters
-     * @param null $info
-     * @return array
-     */
-    public function uploadCSVfileWithCombinations($csv_file, $product, $attributes, $fieldMap, $queryParameters, $info = null)
-    {
-        $allCombinations = $this->allCombinations($attributes[$product['products_id']]['options_list']);
-        $row = array();
-        if ($info != null) {
-            foreach ($allCombinations as $combinations) {
-                foreach ($fieldMap as $key => $field) {
-                    $modelOwn = $this->getModelOwn($product, $combinations);
-                    if ($info == $modelOwn) {
-                        $row[$key] = $this->getRowElements($field, $attributes, $product, $combinations, $queryParameters);
-                    }
-                }
-                return $row;
-            }
-        }
-
-        if (array_key_exists($product['products_id'], $attributes)) {
-            foreach ($allCombinations as $combinations) {
-                foreach ($fieldMap as $key => $field) {
-                    $row[$key] = $this->getRowElements($field, $attributes, $product, $combinations, $queryParameters);
-                }
-                //var_dump($row);
-                fputcsv($csv_file, $row, ';', '"');
-            }
-        } else {
-            foreach ($fieldMap as $key => $field) {
-                $row[$key] = $this->getRowElements($field, null, $product, null, $queryParameters);
-            }
-            //var_dump($row);
-            fputcsv($csv_file, $row, ';', '"');
-        }
-    }
-
-    /**
      * @param $arrays
      * @return array
      */
@@ -1140,6 +943,47 @@ class FeedConfig
     }
 
     /**
+     * @param $csv_file
+     * @param $product
+     * @param $attributes
+     * @param $fieldMap
+     * @param $shopConfig
+     * @param $queryParameters
+     * @param null $info
+     * @return array
+     */
+    public function uploadCSVfileWithCombinations($csv_file, $product, $attributes, $fieldMap, $queryParameters, $info = null)
+    {
+        $allCombinations = $this->allCombinations($attributes[$product['products_id']]['options_list']);
+        $row = array();
+        if ($info != null) {
+            foreach ($allCombinations as $combinations) {
+                foreach ($fieldMap as $key => $field) {
+                    $modelOwn = $this->getModelOwn($product, $combinations);
+                    if ($info == $modelOwn) {
+                        $row[$key] = $this->getRowElements($field, $attributes, $product, $combinations, $queryParameters);
+                    }
+                }
+                return $row;
+            }
+        }
+
+        if (array_key_exists($product['products_id'], $attributes)) {
+            foreach ($allCombinations as $combinations) {
+                foreach ($fieldMap as $key => $field) {
+                    $row[$key] = $this->getRowElements($field, $attributes, $product, $combinations, $queryParameters);
+                }
+                fputcsv($csv_file, $row, ';', '"');
+            }
+        } else {
+            foreach ($fieldMap as $key => $field) {
+                $row[$key] = $this->getRowElements($field, null, $product, null, $queryParameters);
+            }
+            fputcsv($csv_file, $row, ';', '"');
+        }
+    }
+
+    /**
      * @param $field
      * @param null $attributes
      * @param $product
@@ -1159,6 +1003,7 @@ class FeedConfig
                 $result = $product['products_name'];
                 break;
             case 'Subtitle'              :
+                //$result = $this->getElementWith_3_Cases($product, $combinations, $attributes, 'FIELD_SUBTITLE');
                 $result = $this->getSubtitle($product, $combinations, $attributes);
                 break;
             case 'Description'           :
@@ -1686,6 +1531,36 @@ class FeedConfig
         $_SESSION['cart']->contents[] = array($row['id']);
         $_SESSION['cart']->contents[$row['id']] = array('qty' => (int)1);
 
+    }
+
+    /**
+     * update database
+     */
+    public function remove()
+    {
+        $db = $GLOBALS['db'];
+
+        $db->Execute("
+            DELETE FROM " . TABLE_CONFIGURATION . "
+            WHERE configuration_key LIKE '%FEED_%'"
+        );
+    }
+
+    /**
+     * save data in database
+     */
+    public function install()
+    {
+        $db = $GLOBALS['db'];
+
+        foreach ($_POST as $feedifyField => $value) {
+            if (strpos($feedifyField, 'FEED_') !== false) {
+                $db->Execute("
+                    INSERT INTO " . TABLE_CONFIGURATION . " (configuration_key, configuration_value)
+                    VALUES ('" . $feedifyField . "','" . $value . "' )"
+                );
+            }
+        }
     }
 
 

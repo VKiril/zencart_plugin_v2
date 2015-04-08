@@ -1,8 +1,10 @@
 <?php
     include ('includes/application_top.php');
-    $config =  dirname(__FILE__)."/feed/config/FeedConfig.php";
+    $config1 =  dirname(__FILE__)."/feed/config/FeedConfig.php";
+    $config2 =  dirname(__FILE__)."/feed/config/ShopConfig.php";
     $sPath =  dirname(__FILE__)."/feed/sdk/feed.php";
-    require_once($config);
+    require_once($config1);
+    require_once($config2);
 
     if(file_exists($sPath)) {
         require_once($sPath);

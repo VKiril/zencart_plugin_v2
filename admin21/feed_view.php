@@ -2,8 +2,10 @@
 require('includes/application_top.php');
 
 $mainPath = dirname(dirname(__FILE__));
-$sPath = $mainPath."/feed/config/FeedConfig.php";
-require($sPath);
+$sPath1 = $mainPath."/feed/config/FeedConfig.php";
+$sPath2 = $mainPath."/feed/config/ShopConfig.php";
+require($sPath1);
+require($sPath2);
 
 $feedifyConfig = new FeedConfig();
 
